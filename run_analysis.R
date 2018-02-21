@@ -14,19 +14,18 @@ Y <- rbind(tmp1, tmp2)
 
 # 2. Extracting only the measurements on the mean and standard deviation for each measurement.
 
-features <- read.table("features.txt")
-indices_of_good_features <- grep("-mean\\(\\)|-std\\(\\)", features[, 2])
-X <- X[, indices_of_good_features]
-names(X) <- features[indices_of_good_features, 2]
-names(X) <- gsub("\\(|\\)", "", names(X))
-names(X) <- tolower(names(X))
+dataFeaturesMeanStd <- grep("mean\\(\\)|std\\(\\)",dataFeatures$featureName,value=TRUE) #var name
+
+dataFeaturesMeanStd <- union(c("subject","activityNum"), dataFeaturesMeanStd)
+dataTable<- subset(dataTable,select=dataFeaturesMeanStd) 
 
 # 3. Using descriptive activity names to name the activities in the data set.
 
-activities <- read.table("activity_labels.txt")
-activities[, 2] = gsub("_", "", tolower(as.character(activities[, 2])))
-Y[,1] = activities[Y[,1], 2]
-names(Y) <- "activity"
+dataTable <- merge(activityLabels, dataTable , by="activityNum", all.x=TRUE)
+dataTable$activityName <- as.character(dataTable$activityName)
+dataTable$activityName <- as.character(dataTable$activityName)
+dataAggr<- aggregate(. ~ subject - activityName, data = dataTable, mean) 
+dataTable<- tbl_df(arrange(dataAggr,subject,activityName))
 
 # 4. Appropriately labeling the data set with descriptive activity names.
 
